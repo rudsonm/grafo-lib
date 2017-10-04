@@ -126,22 +126,22 @@ function dijkstra(matriz, atual, destino) {
 
 function coloracaoModelBuild(grafo) {
 	var coloracaoModel = [];
-	for(var vertice in grafo.V) {
-		var posicao = grafo.retornarPosicaoVertice(vertice);
+	for(let i = 0; i < grafo.V.length; i++) {
 		coloracaoModel.push({
-			posicao: posicao,
-			nome: vertice,
-			grau: grafo.obterVizinhos(posicao).length,
+			posicao: i,
+			nome: grafo.V[i],
+			grau: grafo.obterVizinhos(i).length,
 			saturacao: 0,
-			cor: null			
+			cor: null
 		});
 	}
-	coloracaoModel.sort((a, b) => b - a);
+	coloracaoModel.sort((a, b) => b.grau - a.grau);
 	return coloracaoModel;
 }
 
 function existeVizinhoComMesmaCor(grafo, atual, vertices, cor) {
-	for(var vertice in vertices) {
+	for(let i = 0; i < vertices.length; i++) {
+		vertice = vertices[i];
 		var vizinhos = Boolean(grafo.a[atual.posicao][vertice.posicao]);
 		if(vizinhos && vertice.cor === cor)
 			return true;
@@ -150,23 +150,24 @@ function existeVizinhoComMesmaCor(grafo, atual, vertices, cor) {
 }
 
 function obterCoresPadrao() {
-	return ['#2ecc71', '#f1c40f', '#2980b9', '#e74c3c', '#2c3e50'];
+	return ['#2ecc71', '#f1c40f', '#2980b9', '#e74c3c', '#2c3e50', '#8e44ad', '#d35400', '#16a085', '#7f8c8d'];
 }
 
 function welshPowell(grafo, cores) {
 	cores = cores || obterCoresPadrao();
 	var verticesNaoColoridos = coloracaoModelBuild(grafo);
 	var verticesColoridos = [];
-	var coresUtilizadas = 0;
 	do {
 		var corAtual = cores.shift();
-		verticesNaoColoridos.forEach(function(vertice, indice) {
-			if(!existeVizinhoComMesmaCor(grafo, vertice, verticesColoridos, corAtual)) {
+		for(let i = 0; i < verticesNaoColoridos.length; i++) {
+			var vertice = verticesNaoColoridos[i];
+			var existeVizinho = existeVizinhoComMesmaCor(grafo, vertice, verticesColoridos, corAtual);
+			if(!existeVizinho) {
 				vertice.cor = corAtual;
-				verticesNaoColoridos.splice(indice, 1);
+				verticesNaoColoridos.splice(i--, 1);
 				verticesColoridos.push(vertice);
 			}
-		});
+		}
 	} while(verticesNaoColoridos.length && cores.length);
 	return verticesColoridos;
 }
@@ -180,12 +181,15 @@ function dSatur(grafo, cores) {
 		var vertice = verticesNaoColoridos[0];
 		var indice = 0;
 		for(let i = 1; i < verticesNaoColoridos; i++) {
-			if(verticesNaoColoridos[i].saturacao > vertice.saturacao || verticesNaoColoridos[i].grau > vertice.grau) {
+			var satAtual = verticesNaoColoridos[i].saturacao;
+			var sat = vertice.saturacao;
+			if(satAtual > sat || (satAtual === sat && verticesNaoColoridos[i].grau > vertice.grau)) {
 				vertice = verticesNaoColoridos[i];
 				indice = i;
 			}
 		}
-		for(let cor in cores) {
+		for(let i = 0; i < cores.length; i++) {
+			var cor = cores[i];
 			if(!existeVizinhoComMesmaCor(grafo, vertice, verticesColoridos, cor)) {
 				vertice.cor = cor;
 				verticesNaoColoridos.splice(indice, 1);
@@ -195,4 +199,14 @@ function dSatur(grafo, cores) {
 		}
 	} while(verticesNaoColoridos.length && cores.length);
 	return verticesColoridos;
+}
+
+function colorirGrafo(grafo, vertices) {
+	for(let i = 0; i < vertices.length; i++) {
+		var vertice = vertices[i];
+		grafo.interface.$("#"+vertice.posicao).css("background-color", vertice.cor);
+	}
+	grafo.interface.layout({
+		name: 'random'
+	}).run();
 }

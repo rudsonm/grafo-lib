@@ -6,7 +6,7 @@ function Arco(posicao, valor, peso) {
 	}
 }
 
-function Grafo(direcionado, ponderado) {
+function Grafo(direcionado = false, ponderado = false) {
 	var cyGraph = cytoscape({
 		container: document.getElementById("graph-container"),
 		style: cytoscape.stylesheet()
