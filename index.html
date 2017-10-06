@@ -1,21 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>GRAFO</title>
-	<script type="text/javascript" src="js/vendors/angular.min.js"></script>
-	<script type="text/javascript" src="js/vendors/cytoscape-spread.js"></script>
-	<script type="text/javascript" src="js/vendors/cytoscape.min.js"></script>	
-	<script type="text/javascript" src="js/grafo.js"></script>
-	<script type="text/javascript" src="js/grafo.utils.js"></script>
- 	<script type="text/javascript" src="js/grafo.instances.js"></script>
- 	<script type="text/javascript" src="js/instance.read.js"></script>
- 	<script type="text/javascript" src="js/grafo.controller.js"></script> 	
- 	<style rel="stylesheet" type="text/css" href="grafo.css"></style>
+	<title>GRAFO</title>	
 </head>
-<body data-ng-app="Module" data-ng-controller="GrafoController">
-<div id="graph-container" style="height: 600px; width: 100%; border: 1px solid #E0E0E0">
-	
+<body data-ng-app="Module" data-ng-controller="GrafoController" style="background-color: #FAFAFA">
+
+<div style="border: 1px solid #CDCDCD">
+	<div id="graph-container" style="height: 600px; width: 100%"></div>	
 </div>
+
 <div data-ng-if="Grafo" class="matriz-adjascencia">
 	<h3>Matriz</h3>
 	<div data-ng-show="Grafo.ponderado">
@@ -115,5 +108,15 @@
 		<button class="btn" data-ng-click="dijkstra(dijkstraOrigem, dijkstraDestino)">Dijkstra</button>
 	</div>	
 </div> 
+
+<script type="text/javascript" src="js/vendors/angular.min.js"></script>
+<script type="text/javascript" src="js/vendors/cytoscape-spread.js"></script>
+<script type="text/javascript" src="js/vendors/cytoscape.min.js"></script>	
+<script type="text/javascript" src="js/grafo.js"></script>
+<script type="text/javascript" src="js/grafo.utils.js"></script>
+ <script type="text/javascript" src="js/grafo.instances.js"></script>
+ <script type="text/javascript" src="js/instance.read.js"></script>
+ <script type="text/javascript" src="js/grafo.controller.js"></script> 	
+ <style rel="stylesheet" type="text/css" href="grafo.css"></style>
 </body>
 </html>

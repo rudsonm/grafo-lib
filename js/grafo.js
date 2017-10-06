@@ -82,6 +82,7 @@ function Grafo(direcionado = false, ponderado = false) {
 
 			this.a[origem][destino] = peso;
 			this.A[origem].push(Arco(destino, this.V[destino], peso));
+			this.interface.add({ group: "edges", data: { id: origem+" "+destino, source: origem, target: destino } });
 		},
 
 		removerArco: function(origem, destino) {

@@ -36,3 +36,71 @@ B_INSTANCE.adicionarAresta(5, 1, 1);
 B_INSTANCE.adicionarAresta(5, 2, 1);
 B_INSTANCE.adicionarAresta(5, 3, 1);
 B_INSTANCE.adicionarAresta(5, 4, 1);
+
+var EXERCICIO_1_INSTANCE = Grafo(false, false);
+
+EXERCICIO_1_INSTANCE.adicionarVertice("A");
+EXERCICIO_1_INSTANCE.adicionarVertice("B");
+EXERCICIO_1_INSTANCE.adicionarVertice("C");
+EXERCICIO_1_INSTANCE.adicionarVertice("D");
+EXERCICIO_1_INSTANCE.adicionarVertice("E");
+EXERCICIO_1_INSTANCE.adicionarVertice("F");
+
+EXERCICIO_1_INSTANCE.adicionarAresta(0, 3);
+EXERCICIO_1_INSTANCE.adicionarAresta(0, 5);
+EXERCICIO_1_INSTANCE.adicionarAresta(1, 2);
+EXERCICIO_1_INSTANCE.adicionarAresta(1, 4);
+EXERCICIO_1_INSTANCE.adicionarAresta(2, 5);
+EXERCICIO_1_INSTANCE.adicionarAresta(3, 4);
+EXERCICIO_1_INSTANCE.adicionarAresta(4, 1);
+
+var EXERCICIO_2_INSTANCE = Grafo(false, false);
+
+EXERCICIO_2_INSTANCE.adicionarVertice("A");
+EXERCICIO_2_INSTANCE.adicionarVertice("B");
+EXERCICIO_2_INSTANCE.adicionarVertice("C");
+EXERCICIO_2_INSTANCE.adicionarVertice("D");
+EXERCICIO_2_INSTANCE.adicionarVertice("E");
+
+EXERCICIO_2_INSTANCE.adicionarAresta(0, 1);
+EXERCICIO_2_INSTANCE.adicionarAresta(0, 2);
+EXERCICIO_2_INSTANCE.adicionarAresta(1, 3);
+EXERCICIO_2_INSTANCE.adicionarAresta(2, 4);
+EXERCICIO_2_INSTANCE.adicionarAresta(3, 4);
+
+var EXERCICIO_3_INSTANCE = Grafo(false, false);
+
+EXERCICIO_3_INSTANCE.adicionarVertice("A");
+EXERCICIO_3_INSTANCE.adicionarVertice("B");
+EXERCICIO_3_INSTANCE.adicionarVertice("C");
+EXERCICIO_3_INSTANCE.adicionarVertice("D");
+EXERCICIO_3_INSTANCE.adicionarVertice("E");
+
+EXERCICIO_3_INSTANCE.adicionarAresta(0, 1);
+EXERCICIO_3_INSTANCE.adicionarAresta(0, 2);
+EXERCICIO_3_INSTANCE.adicionarAresta(0, 3);
+EXERCICIO_3_INSTANCE.adicionarAresta(0, 4);
+EXERCICIO_3_INSTANCE.adicionarAresta(1, 2);
+EXERCICIO_3_INSTANCE.adicionarAresta(1, 3);
+EXERCICIO_3_INSTANCE.adicionarAresta(1, 4);
+EXERCICIO_3_INSTANCE.adicionarAresta(2, 3);
+EXERCICIO_3_INSTANCE.adicionarAresta(2, 4);
+EXERCICIO_3_INSTANCE.adicionarAresta(3, 4);
+
+var EXERCICIO_4_INSTANCE = Grafo(false, true);
+
+EXERCICIO_4_INSTANCE.adicionarVertice("A");
+EXERCICIO_4_INSTANCE.adicionarVertice("B");
+EXERCICIO_4_INSTANCE.adicionarVertice("C");
+EXERCICIO_4_INSTANCE.adicionarVertice("D");
+EXERCICIO_4_INSTANCE.adicionarVertice("E");
+EXERCICIO_4_INSTANCE.adicionarVertice("F");
+
+EXERCICIO_4_INSTANCE.adicionarVertice(0, 1, 1);
+EXERCICIO_4_INSTANCE.adicionarVertice(0, 2, 5);
+EXERCICIO_4_INSTANCE.adicionarVertice(1, 3, 4);
+EXERCICIO_4_INSTANCE.adicionarVertice(1, 4, 6);
+EXERCICIO_4_INSTANCE.adicionarVertice(2, 4, 1);
+EXERCICIO_4_INSTANCE.adicionarVertice(2, 5, 2);
+EXERCICIO_4_INSTANCE.adicionarVertice(3, 5, 15);
+EXERCICIO_4_INSTANCE.adicionarVertice(4, 5, 7);

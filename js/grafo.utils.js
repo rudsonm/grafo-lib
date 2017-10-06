@@ -102,7 +102,7 @@ function dijkstra(matriz, atual, destino) {
     	var vizinhos = obterVizinhos(atual, matriz);
     	for(var i = 0; i < vizinhos.length; i++) {
     		var v = vizinhos[i];
-    		var caminhada = vertices[atual].distancia + matriz[atual][v];
+			var caminhada = vertices[atual].distancia + matriz[atual][v];
     		if(caminhada < vertices[v].distancia) {
 				vertices[v].distancia = caminhada;
 				vertices[v].anterior = atual;    				
@@ -113,9 +113,11 @@ function dijkstra(matriz, atual, destino) {
     	var menorDistancia = Infinity;
     	var existeVerticeAbertoFinito = false;
     	for(var i = 0; i < vertices.length; i++) {
-			if(vertices[i].aberto && vertices[i].distancia < Infinity) {
+			var vertice = vertices[i];
+			if(vertice.aberto && vertice.distancia < Infinity) {
 				existeVerticeAbertoFinito = true;
-				if (vertices[i].distancia < menorDistancia) {
+				if (vertice.distancia < menorDistancia) {
+					menorDistancia = vertice.distancia;
 					atual = i;
 				}
 			}
@@ -191,6 +193,13 @@ function dSatur(grafo, cores) {
 		for(let i = 0; i < cores.length; i++) {
 			var cor = cores[i];
 			if(!existeVizinhoComMesmaCor(grafo, vertice, verticesColoridos, cor)) {
+				for(let vizinho of verticesNaoColoridos) {
+					if(Boolean(grafo.existeAresta(vertice.posicao, vizinho.posicao))) {
+						if(!existeVizinhoComMesmaCor(grafo, vizinho, verticesColoridos, cor)){
+							vizinho.saturacao++;
+						}
+					}
+				}
 				vertice.cor = cor;
 				verticesNaoColoridos.splice(indice, 1);
 				verticesColoridos.push(vertice);

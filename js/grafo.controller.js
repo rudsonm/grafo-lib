@@ -4,36 +4,29 @@ angular.module("Module", []);
 angular.module("Module").controller("GrafoController", GrafoController);
 function GrafoController($scope) {
 	'use strict';
-	var B_INSTANCE = Grafo(false, false);
-	
-	B_INSTANCE.adicionarVertice('A');
-	B_INSTANCE.adicionarVertice('B');
-	B_INSTANCE.adicionarVertice('C');
-	B_INSTANCE.adicionarVertice('D');
-	B_INSTANCE.adicionarVertice('E');
-	B_INSTANCE.adicionarVertice('F');
-	
-	B_INSTANCE.adicionarAresta(2, 1, 1);
-	B_INSTANCE.adicionarAresta(3, 1, 1);
-	B_INSTANCE.adicionarAresta(3, 2, 1);
-	B_INSTANCE.adicionarAresta(5, 0, 1);
-	B_INSTANCE.adicionarAresta(5, 1, 1);
-	B_INSTANCE.adicionarAresta(5, 2, 1);
-	B_INSTANCE.adicionarAresta(5, 3, 1);
-	B_INSTANCE.adicionarAresta(5, 4, 1);
-	$scope.Grafo = B_INSTANCE;
-	var verticesColoridos = dSatur($scope.Grafo);
-	console.log(verticesColoridos);
-	colorirGrafo($scope.Grafo, verticesColoridos);
 
-	// colorirGrafo($scope.Grafo, dSatur($scope.Grafo));
-	// getInstance("costa/strike.net", function(instancia) {
-	// 	$scope.Grafo = instancia;
-	// 	$scope.$apply();
+	var EXERCICIO_4_INSTANCE = Grafo(false, true);
+	
+	EXERCICIO_4_INSTANCE.adicionarVertice("A");
+	EXERCICIO_4_INSTANCE.adicionarVertice("B");
+	EXERCICIO_4_INSTANCE.adicionarVertice("C");
+	EXERCICIO_4_INSTANCE.adicionarVertice("D");
+	EXERCICIO_4_INSTANCE.adicionarVertice("E");
+	EXERCICIO_4_INSTANCE.adicionarVertice("F");
+	
+	EXERCICIO_4_INSTANCE.adicionarAresta(0, 1, 1);
+	EXERCICIO_4_INSTANCE.adicionarAresta(0, 2, 5);
+	EXERCICIO_4_INSTANCE.adicionarAresta(1, 3, 4);
+	EXERCICIO_4_INSTANCE.adicionarAresta(1, 4, 6);
+	EXERCICIO_4_INSTANCE.adicionarAresta(2, 4, 1);
+	EXERCICIO_4_INSTANCE.adicionarAresta(2, 5, 2);
+	EXERCICIO_4_INSTANCE.adicionarAresta(3, 5, 15);
+	EXERCICIO_4_INSTANCE.adicionarAresta(4, 5, 7);
 
-	// 	var verticesColoridos = dSatur($scope.Grafo);
-	// 	colorirGrafo($scope.Grafo, verticesColoridos);
-	// });
+	$scope.Grafo = EXERCICIO_4_INSTANCE;
+
+	colorirGrafo($scope.Grafo, dSatur($scope.Grafo));
+	//colorirGrafo($scope.Grafo, welshPowell($scope.Grafo));
 
 	$scope.buscarEmProfundidade = function(origem, destino = null) {
 		$scope.busca = {
@@ -54,6 +47,7 @@ function GrafoController($scope) {
 			tipo: "Dijkstra",
 			sequencia: dijkstra($scope.Grafo.a, origem, destino)
 		}
+		console.log($scope.busca.sequencia);
 	}
 
 	$scope.instanciarGrafo = function(direcionado, ponderado) {
