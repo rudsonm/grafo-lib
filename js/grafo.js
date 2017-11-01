@@ -1,131 +1,256 @@
-function Arco(posicao, valor, peso) {
-	return {
-		posicao: posicao,
-		valor: valor,
-		peso: peso
+Array.prototype.firstOrNull = function () {
+	return (this.length) ? this[0] : null;
+}
+
+Array.prototype.copy = function () {
+	return Object.assign([], this);
+}
+
+class Arc {
+	constructor(source, target, weight = 1) {
+		this.source = source;
+		this.target = target;
+		this.weight = weight;
 	}
 }
 
-function Grafo(direcionado = false, ponderado = false) {
-	var cyGraph = cytoscape({
-		container: document.getElementById("graph-container"),
-		style: cytoscape.stylesheet()
-				.selector('node')
-				.css({
-					'content': 'data(name)'
-				})
-	});
-	return {
-		interface: cyGraph,
-		V: [],
-		A: [],
-		a: [],
-		direcionado: direcionado,
-		ponderado: ponderado,
+class Grafo {
+	constructor(directed, weighted) {
+		this.vivaGraph = Viva.Graph.graph();
 
-		adicionarVertice: function (nome) {
-			this.V.push(nome);
-			this.A.push([]);
-			this.a.push([]);
-			for (var i = 0; i < this.a.length; i++)
-				for (var j = this.a[i].length; j < this.V.length; j++)
-					this.a[i].push(0);
-			this.interface.add({
-				group: "nodes",
-				data: { id: this.V.length-1, name: nome }
+		this.render = function () {
+			var container = document.getElementById("graphDiv");
+
+			var labels = Object.create(null);
+			this.vivaGraph.forEachNode(function (node) {
+				var label = document.createElement('span');
+				label.classList.add('node-label');
+				label.innerText = node.id;
+				labels[node.id] = label;
+				container.appendChild(label);
 			});
-			this.interface.layout({
-				name: 'random'
+
+			var layout = Viva.Graph.Layout.forceDirected(this.vivaGraph, {
+				springLength: 100,
+				springCoeff: 0.0008,
+				dragCoeff: 0.02,
+				gravity: -1.2
+			});
+
+			var graphics = Viva.Graph.View.webglGraphics();
+			graphics.placeNode(function (ui, pos) {
+				var domPos = {
+					x: pos.x,
+					y: pos.y
+				};
+				graphics.transformGraphToClientCoordinates(domPos);
+				var nodeId = ui.node.id;
+				var labelStyle = labels[nodeId].style;
+				labelStyle.left = domPos.x + 'px';
+				labelStyle.top = domPos.y + 'px';
+			});
+
+			this.renderer = Viva.Graph.View.renderer(this.vivaGraph, {
+				container: container,
+				layout: layout,
+				graphics: graphics
 			}).run();
-		},
+		}
 
-		removerVertice: function (nome) {
-			this.V.forEach(function(v, indice) {
-				if(v === nome) {
-					this.V.splice(indice, 1);
-					this.A.splice(indice, 1);
-					this.a.splice(indice, 1);
-					this.a.forEach(function(j) {
-						j.splice(indice, 1);
-					});
-				}
-			});
-		},
+		this.directed = directed;
+		this.weighted = weighted;
+		this.vertices = new Array();
+		this.list = new Array();
+		this.matrix = new Array();
 
-		adicionarAresta: function(origem, destino, peso) {
-			if(this.direcionado) return this.adicionarArco(origem, destino, peso);
-			peso = (this.ponderado) ? peso || 1 : 1;
-			this.a[origem][destino] = peso;
-			this.a[destino][origem] = peso;
-			this.A[origem].push(Arco(destino, this.V[destino]));
-			this.A[destino].push(Arco(origem, this.V[origem], peso));
-			this.interface.add({ group: "edges", data: { id: origem+" "+destino, source: origem, target: destino } });
-		},
+		this.addVertice = addVertice;
+		this.removeVertice = removeVertice;
+		this.getIndexOfVertice = getIndexOfVertice;
+		this.getVertice = getVertice;
+		this.addArc = addArc;
+		this.removeArc = removeArc;
+		this.addEdge = addEdge;
+		this.removeEdge = removeEdge;
+		this.getArc = getArc;
+		this.isConnected = isConnected;
+		this.getNeighbors = getNeighbors;
+		this.getNeighborsByIndex = getNeighborsByIndex;
 
-		removerAresta: function(origem, destino) {
-			if(this.direcionado) return this.removerArco(origem, destino);
-			this.a[origem][destino] = 0;
-			this.a[destino][origem] = 0;
-			for (var i = 0; i < this.A[origem].length; i++) {
-				if(this.A[origem][i].posicao === destino)
-					this.A[origem].splice(i, 1);
+		this.hasTreeCicle = hasTreeCicle;
+	}
+}
+
+function addVertice(vertice) {
+	this.vertices.push(vertice);
+	this.list.push(new Array());
+	this.matrix.push(new Array());
+	for (let i = 0; i < this.matrix.length; i++) {
+		for (let j = this.matrix[i].length; j < this.matrix.length; j++) {
+			this.matrix[i].push(0);
+		}
+	}
+
+	this.vivaGraph.addNode(vertice);
+}
+
+function removeVertice(vertice) {
+	let index = this.vertices.filter(v => v == vertice).firstOrNull();
+	if (!index)
+		return false;
+	this.vertices.splice(index, 1);
+	this.list.splice(index, 1);
+	for (let i = 0; i < this.matrix.length; i++) {
+		this.matrix[i].splice(index, 1);
+		index = this.list[i].filter(v => v == vertice).firstOrNull();
+		if (index)
+			this.list[i].splice(index, 1);
+	}
+}
+
+function getIndexOfVertice(vertice) {
+	return this.vertices.indexOf(vertice);
+}
+
+function getVertice(vertice) {
+	if (typeof (vertice) === "string")
+		vertice = this.getIndexOfVertice(vertice);
+	return this.vertices[vertice];
+}
+
+function addEdge(source, target, weight = 1) {
+	if (typeof (source) === "string")
+		source = this.getIndexOfVertice(source);
+	if (typeof (target) === "string")
+		target = this.getIndexOfVertice(target);
+	this.addArc(source, target, weight);
+	this.addArc(target, source, weight);
+
+	this.vivaGraph.addLink(this.vertices[source], this.vertices[target]);
+}
+
+function addArc(source, target, weight = 1) {
+	if (typeof (source) === "string")
+		source = this.getIndexOfVertice(source);
+	if (typeof (target) === "string")
+		target = this.getIndexOfVertice(target);
+	this.matrix[source][target] = weight;
+	let arc = new Arc(source, target, weight);
+	this.list[source].push(arc);
+}
+
+function removeEdge(source, target) {
+	if (typeof (source) === "string")
+		source = this.getIndexOfVertice(source);
+	if (typeof (target) === "string")
+		target = this.getIndexOfVertice(target);
+	this.removeArc(source, target);
+	this.removeArc(target, source);
+}
+
+function removeArc(source, target) {
+	if (typeof (source) === "string")
+		source = this.getIndexOfVertice(source);
+	if (typeof (target) === "string")
+		target = this.getIndexOfVertice(target);
+	this.matrix[source][target] = 0;
+	let index = this.list[source]
+		.filter(v => v.source == source && v.target == target)
+		.map((v, i) => i)
+		.firstOrNull();
+	this.list[source].splice(index, 1);
+}
+
+function getArc(source, target) {
+	if (typeof (source) === "string")
+		source = this.vertices.indexOf(source);
+	if (typeof (target) === "string")
+		target = this.vertices.indexOf(target);
+	return this.list[source].filter(arc => arc.target === target).firstOrNull();
+}
+
+function getNeighbors(source) {
+	let index = this.vertices.indexOf(source);
+	return this.getNeighborsByIndex(index);
+}
+
+function getNeighborsByIndex(source) {
+	return this.list[source].map(s => this.getVertice(s.target));
+}
+
+function isConnected(source, target) {
+	if (typeof (source) === "string")
+		source = this.getIndexOfVertice(source);
+	if (typeof (target) === "string")
+		target = this.getIndexOfVertice(target);
+	return Boolean(this.matrix[source][target]);
+}
+
+function hasTreeCicle() {
+	for (const first of this.vertices) {
+		let firstNeighbors = this.getNeighbors(first);
+		for (const second of firstNeighbors) {
+			let secondNeighbors = this.getNeighbors(second);
+			for (const third of secondNeighbors) {
+				if (isConnected(first, third))
+					return true;
 			}
-			for (var i = 0; i < this.A[destino].length; i++) {
-				if(this.A[destino][i].posicao === origem)
-					this.A[destino].splice(i, 1);
-			}			
-		},
-
-		adicionarArco: function(origem, destino, peso) {
-			peso = (this.ponderado) ? peso || 1 : 1;
-			if(!this.direcionado) return this.adicionarAresta(origem, destino);			
-
-			this.a[origem][destino] = peso;
-			this.A[origem].push(Arco(destino, this.V[destino], peso));
-			this.interface.add({ group: "edges", data: { id: origem+" "+destino, source: origem, target: destino } });
-		},
-
-		removerArco: function(origem, destino) {
-			if(!this.direcionado) return this.removerAresta(origem, destino);
-			this.a[origem][destino] = 0;
-			for (var i = 0; i < this.A[origem].length; i++) {
-				if(this.A[origem][i].posicao === destino)
-					this.A[origem].splice(i, 1);
-			}
-		},
-
-		retornarVertice: function(nome) {
-			var retorno = false;
-			this.V.forEach(function(v) {
-				if(nome === v)
-					retorno = true;
-			});
-			return retorno;
-		},
-
-		retornarPosicaoVertice: function(nome) {
-			this.V.forEach(function(v, posicao) {
-				if(nome === v) {
-					return posicao;
-				}
-			});
-			return 0;
-		},
-		
-		existeAresta: function(origem, destino) {
-			return this.a[origem][destino];
-		},
-
-		retornarArestas: function(origem) {
-			var adjascentes = [];
-			for (var i = 0; i < this.V.length; i++)
-				if(i !== origem && this.a[origem][i])
-					adjascentes.push(i);
-			return adjascentes;
-		},
-		
-		obterVizinhos: function(origem) {
-			return this.retornarArestas(origem);
 		}
 	}
 }
+
+var grafo = new Grafo(false, true);
+grafo.addVertice("A");
+grafo.addVertice("B");
+grafo.addVertice("C");
+grafo.addVertice("D");
+grafo.addVertice("E");
+grafo.addVertice("F");
+grafo.addVertice("G");
+
+grafo.addEdge("A", "B", 10);
+grafo.addEdge("A", "C", 9);
+grafo.addEdge("B", "C", 8);
+grafo.addEdge("D", "E", 7);
+grafo.addEdge("D", "F", 6);
+grafo.addEdge("D", "A", 5);
+grafo.addEdge("E", "B", 4);
+grafo.addEdge("E", "A", 3);
+grafo.addEdge("F", "B", 2);
+grafo.addEdge("G", "A", 1);
+grafo.addEdge("G", "B", 2);
+grafo.addEdge("G", "D", 3);
+grafo.addEdge("G", "E", 4);
+
+function prim(grafo) {
+	let edges = new Array();
+	let vertices = grafo.vertices.copy();
+	let nextRemovedVertice = Math.random() * vertices.length - 1;
+	nextRemovedVertice = vertices.splice(nextRemovedVertice, 1).firstOrNull();
+	let removedVertices = [nextRemovedVertice];
+	while (vertices.length) {
+		let minArc = new Arc(null, null, Infinity);
+		for (let vertice of removedVertices) {
+			let neighbors = grafo.getNeighbors(vertice).filter(n => vertices.some(v => v === n));
+			for (let neighbor of neighbors) {
+				let arc = grafo.getArc(vertice, neighbor);
+				if (arc.weight < minArc.weight) {
+					minArc = new Arc(arc.source, arc.target, arc.weight);
+					nextRemovedVertice = neighbor;
+				}
+			}
+		}
+		edges.push(minArc);
+		let indexOfVertice = vertices.indexOf(nextRemovedVertice);
+		vertices.splice(indexOfVertice, 1);
+		removedVertices.unshift(nextRemovedVertice);
+	}
+
+	let primGraph = new Grafo(grafo.directed, grafo.weighted);
+	for (let v of grafo.vertices)
+		primGraph.addVertice(v);
+	for (let e of edges)
+		primGraph.addEdge(e.source, e.target, e.weight);
+	return primGraph;
+}
+let primGraph = prim(grafo);
+primGraph.render();
