@@ -260,18 +260,11 @@ function kruskal(grafo) {
 	let edges = new Array();
 	let removedEdges = new Array();
 	for(let edges of grafo.list) {
-		for(let edge of edges) {
-			let alreadyIncluded = removedEdges.some(e => 
-				(e.source === edge.source && e.target === edge.target) ||
-				(e.source === edge.target && e.target === edge.source)
-			);
-			if(!alreadyIncluded)
-				removedEdges.push(edge);
-		}
+		removedEdges = removedEdges.concat(edges);
 	}
-	let forest = grafo.vertices.map(v => [v]);	
+	let forest = grafo.vertices.map(v => [v]);
 	removedEdges.sort((a, b) => b.weight - a.weight);
-	while(removedEdges.length) {
+	while(edges.length < grafo.vertices.length - 1) {
 		let minEdge = removedEdges.pop();
 		let source = grafo.getVertice(minEdge.source);
 		let target = grafo.getVertice(minEdge.target);
