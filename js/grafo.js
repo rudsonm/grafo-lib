@@ -249,8 +249,53 @@ function prim(grafo) {
 	for (let v of grafo.vertices)
 		primGraph.addVertice(v);
 	for (let e of edges)
-		primGraph.addEdge(e.source, e.target, e.weight);
+		primGraph.addEdge(e.source, e.target, e.weight);		
 	return primGraph;
 }
+
 let primGraph = prim(grafo);
 primGraph.render();
+
+function kruskal(grafo) {
+	let edges = new Array();
+	let removedEdges = new Array();
+	for(let edges of grafo.list) {
+		for(let edge of edges) {
+			let alreadyIncluded = removedEdges.some(e => 
+				(e.source === edge.source && e.target === edge.target) ||
+				(e.source === edge.target && e.target === edge.source)
+			);
+			if(!alreadyIncluded)
+				removedEdges.push(edge);
+		}
+	}
+	let forest = grafo.vertices.map(v => [v]);	
+	removedEdges.sort((a, b) => b.weight - a.weight);
+	while(removedEdges.length) {
+		let minEdge = removedEdges.pop();
+		let source = grafo.getVertice(minEdge.source);
+		let target = grafo.getVertice(minEdge.target);
+		let sourceTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === source)).firstOrNull();
+		let targetTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === target)).firstOrNull();		
+		if(sourceTree[0] !== targetTree[0]) {
+			edges.push(minEdge);
+			let targetIndex = targetTree[1].indexOf(target);
+			if(targetTree[1].length > sourceTree[1]) {
+				let temp = sourceTree[0];
+				sourceTree[0] = targetTree[0];
+				targetTree[0] = temp;
+			}
+			forest[targetTree[0]].splice(targetIndex, 1);
+			forest[sourceTree[0]].push(target);
+		}
+	}
+	let kruskalGraph = new Grafo(false, true);
+	for(let vertice of forest.filter(tree => tree.length).firstOrNull())
+		kruskalGraph.addVertice(vertice);
+	for(let edge of edges)
+		kruskalGraph.addEdge(edge.source, edge.target, edge.weight);
+	return kruskalGraph;
+}
+
+let kruskalGraph = kruskal(grafo);
+// kruskalGraph.render();
