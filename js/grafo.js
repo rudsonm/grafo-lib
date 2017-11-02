@@ -254,7 +254,7 @@ function prim(grafo) {
 }
 
 let primGraph = prim(grafo);
-primGraph.render();
+// primGraph.render();
 
 function kruskal(grafo) {
 	let edges = new Array();
@@ -276,17 +276,11 @@ function kruskal(grafo) {
 		let source = grafo.getVertice(minEdge.source);
 		let target = grafo.getVertice(minEdge.target);
 		let sourceTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === source)).firstOrNull();
-		let targetTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === target)).firstOrNull();		
+		let targetTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === target)).firstOrNull();
 		if(sourceTree[0] !== targetTree[0]) {
 			edges.push(minEdge);
-			let targetIndex = targetTree[1].indexOf(target);
-			if(targetTree[1].length > sourceTree[1]) {
-				let temp = sourceTree[0];
-				sourceTree[0] = targetTree[0];
-				targetTree[0] = temp;
-			}
-			forest[targetTree[0]].splice(targetIndex, 1);
-			forest[sourceTree[0]].push(target);
+			forest[sourceTree[0]] = forest[sourceTree[0]].concat(forest[targetTree[0]]);
+			forest.splice(targetTree[0], 1);
 		}
 	}
 	let kruskalGraph = new Grafo(false, true);
@@ -298,4 +292,4 @@ function kruskal(grafo) {
 }
 
 let kruskalGraph = kruskal(grafo);
-// kruskalGraph.render();
+kruskalGraph.render();
