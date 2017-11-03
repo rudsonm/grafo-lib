@@ -4,11 +4,11 @@
         <title>Grafo</title>
         <meta charset="UTF-8">        
         <style type='text/css'>
-            #graphDiv, body, svg {
-                height: 100%;
-                width: 100%;
+            #graphDiv, svg {
+                height: 80%;
+                width: 99%;
                 position: absolute;
-                margin: 0;
+                margin: 3.5% 0 0 0;
             }
             .node-label {
                   position: absolute;
@@ -17,11 +17,34 @@
                   z-index: 10;
             }
         </style>
+        <script type="text/javascript" src="js/vendors/vivagraph.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
     </head>
-    <body>
+    <body>                
+        <div style="width: 50%; display: inline-block">
+            <div>
+                <label for="vertice.nome">Vertice: </label>
+                <input id="vertice.nome" placeholder="Nome" type="text">                
+                <button>Remove</button>
+                <button onclick="grafo.addVertice()">Add</button>
+            </div>
+            <div>
+                <label for="aresta.origem">Aresta: </label>
+                <input id="aresta.origem" placeholder="Origem" type="text">                
+                <label for="aresta.destino"> -> </label>
+                <input id="aresta.destino" placeholder="Destino" type="text">
+                <button>Remove</button>
+                <button onclick="grafo.addEdge(null, null)">Add</button>
+            </div>
+        </div>
+        <div style="display: inline-block">
+            <button onclick="prim(grafo)">Prim</button>
+            <button onclick="kruskal(grafo)">Kruskal</button>
+            <button onclick="alert(grafo.planarity())">Planar</button>
+        </div>
+
         <div id="graphDiv"></div>
 
-        <script type="text/javascript" src="js/vendors/vivagraph.js"></script>
         <script type="text/javascript" src="js/grafo.js"></script>
     </body>
 </html>

@@ -77,10 +77,14 @@ class Grafo {
 		this.getNeighborsByIndex = getNeighborsByIndex;
 
 		this.hasTreeCicle = hasTreeCicle;
+		this.planarity = planarity;
 	}
 }
 
 function addVertice(vertice) {
+	vertice = vertice || document.getElementById("vertice.nome").value;
+	document.getElementById("vertice.nome").value = "";
+	
 	this.vertices.push(vertice);
 	this.list.push(new Array());
 	this.matrix.push(new Array());
@@ -89,7 +93,7 @@ function addVertice(vertice) {
 			this.matrix[i].push(0);
 		}
 	}
-
+	
 	this.vivaGraph.addNode(vertice);
 }
 
@@ -113,26 +117,33 @@ function getIndexOfVertice(vertice) {
 
 function getVertice(vertice) {
 	if (typeof (vertice) === "string")
-		vertice = this.getIndexOfVertice(vertice);
+		vertice = this.vertices.indexOf(vertice);
 	return this.vertices[vertice];
 }
 
 function addEdge(source, target, weight = 1) {
+	if(source !== 0 && !source)
+		source = document.getElementById("aresta.origem").value;
+	document.getElementById("aresta.origem").value = "";
+	if (target !== 0 && !target)
+		target = document.getElementById("aresta.destino").value;
+	document.getElementById("aresta.destino").value = "";	
+
 	if (typeof (source) === "string")
-		source = this.getIndexOfVertice(source);
+		source = this.vertices.indexOf(source);
 	if (typeof (target) === "string")
-		target = this.getIndexOfVertice(target);
+		target = this.vertices.indexOf(target);	
+
 	this.addArc(source, target, weight);
 	this.addArc(target, source, weight);
-
 	this.vivaGraph.addLink(this.vertices[source], this.vertices[target]);
 }
 
 function addArc(source, target, weight = 1) {
 	if (typeof (source) === "string")
-		source = this.getIndexOfVertice(source);
+		source = this.vertices.indexOf(source);
 	if (typeof (target) === "string")
-		target = this.getIndexOfVertice(target);
+		target = this.vertices.indexOf(target);
 	this.matrix[source][target] = weight;
 	let arc = new Arc(source, target, weight);
 	this.list[source].push(arc);
@@ -177,11 +188,11 @@ function getNeighborsByIndex(source) {
 	return this.list[source].map(s => this.getVertice(s.target));
 }
 
-function isConnected(source, target) {
+function isConnected(source, target) {	
 	if (typeof (source) === "string")
-		source = this.getIndexOfVertice(source);
+		source = this.vertices.indexOf(source);
 	if (typeof (target) === "string")
-		target = this.getIndexOfVertice(target);
+		target = this.vertices.indexOf(target);
 	return Boolean(this.matrix[source][target]);
 }
 
@@ -191,14 +202,29 @@ function hasTreeCicle() {
 		for (const second of firstNeighbors) {
 			let secondNeighbors = this.getNeighbors(second);
 			for (const third of secondNeighbors) {
-				if (isConnected(first, third))
+				if (this.isConnected(first, third))
 					return true;
 			}
 		}
 	}
 }
 
+function planarity() {
+	let numberOfNodes = this.vertices.length;
+	if (numberOfNodes <= 2)
+		return true;
+	let numberOfEdges = this.list.map(edges => edges.length).reduce((a, b) => a + b);
+	if (!this.directed)
+		numberOfEdges /= 2;
+	if (numberOfNodes >= 3 && 
+		numberOfEdges <= 3 * numberOfNodes - 6 && 
+		this.hasTreeCicle())
+		return true;
+	return false;
+}
+
 var grafo = new Grafo(false, true);
+
 grafo.addVertice("A");
 grafo.addVertice("B");
 grafo.addVertice("C");
@@ -206,6 +232,17 @@ grafo.addVertice("D");
 grafo.addVertice("E");
 grafo.addVertice("F");
 grafo.addVertice("G");
+
+// grafo.addEdge("A", "B");
+// grafo.addEdge("A", "C");
+// grafo.addEdge("A", "D");
+// grafo.addEdge("A", "E");
+// grafo.addEdge("B", "C");
+// grafo.addEdge("B", "D");
+// grafo.addEdge("B", "E");
+// grafo.addEdge("C", "D");
+// grafo.addEdge("C", "E");
+// grafo.addEdge("D", "E");
 
 grafo.addEdge("A", "B", 10);
 grafo.addEdge("A", "C", 9);
@@ -248,13 +285,13 @@ function prim(grafo) {
 	let primGraph = new Grafo(grafo.directed, grafo.weighted);
 	for (let v of grafo.vertices)
 		primGraph.addVertice(v);
-	for (let e of edges)
-		primGraph.addEdge(e.source, e.target, e.weight);		
+	for (let edge of edges)
+		primGraph.addEdge(edge.source, edge.target, edge.weight);		
+	
 	return primGraph;
 }
 
 let primGraph = prim(grafo);
-primGraph.render();
 
 function kruskal(grafo) {
 	let edges = new Array();
@@ -298,4 +335,3 @@ function kruskal(grafo) {
 }
 
 let kruskalGraph = kruskal(grafo);
-// kruskalGraph.render();
