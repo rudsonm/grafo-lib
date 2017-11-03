@@ -18,8 +18,21 @@ class Grafo {
 	constructor(directed, weighted) {
 		this.vivaGraph = Viva.Graph.graph();
 
-		this.render = function () {
+		this.render = function () {			
 			var container = document.getElementById("graphDiv");
+			var spans = container.getElementsByTagName("span");
+			for(let i = spans.length - 1; i >= 0; i--) {
+				spans[i].remove();
+			}
+			var svg = container.getElementsByTagName("canvas").item(0);
+			if(svg) svg.remove();			
+
+			var layout = Viva.Graph.Layout.forceDirected(this.vivaGraph, {
+				springLength: 100,
+				springCoeff: 0.0008,
+				dragCoeff: 0.02,
+				gravity: -1.2
+			});
 
 			var labels = Object.create(null);
 			this.vivaGraph.forEachNode(function (node) {
@@ -28,13 +41,6 @@ class Grafo {
 				label.innerText = node.id;
 				labels[node.id] = label;
 				container.appendChild(label);
-			});
-
-			var layout = Viva.Graph.Layout.forceDirected(this.vivaGraph, {
-				springLength: 100,
-				springCoeff: 0.0008,
-				dragCoeff: 0.02,
-				gravity: -1.2
 			});
 
 			var graphics = Viva.Graph.View.webglGraphics();
@@ -210,16 +216,17 @@ function hasTreeCicle() {
 }
 
 function planarity() {
-	let numberOfNodes = this.vertices.length;
+	let numberOfNodes = this.vertices.length;	
 	if (numberOfNodes <= 2)
 		return true;
 	let numberOfEdges = this.list.map(edges => edges.length).reduce((a, b) => a + b);
 	if (!this.directed)
-		numberOfEdges /= 2;
-	if (numberOfNodes >= 3 && 
-		numberOfEdges <= 3 * numberOfNodes - 6 && 
-		this.hasTreeCicle())
+		numberOfEdges /= 2;	
+	if(this.hasTreeCicle() && numberOfNodes >= 3 && numberOfEdges <= 3 * numberOfNodes - 6)
 		return true;
+	if(!this.hasTreeCicle() && numberOfNodes >= 3 && numberOfEdges <= 2 * numberOfNodes - 4)
+		return true;
+
 	return false;
 }
 
@@ -231,32 +238,31 @@ grafo.addVertice("C");
 grafo.addVertice("D");
 grafo.addVertice("E");
 grafo.addVertice("F");
-grafo.addVertice("G");
+// grafo.addVertice("G");
 
-// grafo.addEdge("A", "B");
-// grafo.addEdge("A", "C");
-// grafo.addEdge("A", "D");
-// grafo.addEdge("A", "E");
-// grafo.addEdge("B", "C");
-// grafo.addEdge("B", "D");
-// grafo.addEdge("B", "E");
-// grafo.addEdge("C", "D");
-// grafo.addEdge("C", "E");
-// grafo.addEdge("D", "E");
+grafo.addEdge("A", "D");
+grafo.addEdge("A", "E");
+grafo.addEdge("A", "F");
+grafo.addEdge("B", "D");
+grafo.addEdge("B", "E");
+grafo.addEdge("B", "F");
+grafo.addEdge("C", "D");
+grafo.addEdge("C", "E");
+grafo.addEdge("C", "F");
 
-grafo.addEdge("A", "B", 10);
-grafo.addEdge("A", "C", 9);
-grafo.addEdge("B", "C", 8);
-grafo.addEdge("D", "E", 7);
-grafo.addEdge("D", "F", 6);
-grafo.addEdge("D", "A", 5);
-grafo.addEdge("E", "B", 4);
-grafo.addEdge("E", "A", 3);
-grafo.addEdge("F", "B", 2);
-grafo.addEdge("G", "A", 1);
-grafo.addEdge("G", "B", 2);
-grafo.addEdge("G", "D", 3);
-grafo.addEdge("G", "E", 4);
+// grafo.addEdge("A", "B", 10);
+// grafo.addEdge("A", "C", 9);
+// grafo.addEdge("B", "C", 8);
+// grafo.addEdge("D", "E", 7);
+// grafo.addEdge("D", "F", 6);
+// grafo.addEdge("D", "A", 5);
+// grafo.addEdge("E", "B", 4);
+// grafo.addEdge("E", "A", 3);
+// grafo.addEdge("F", "B", 2);
+// grafo.addEdge("G", "A", 1);
+// grafo.addEdge("G", "B", 2);
+// grafo.addEdge("G", "D", 3);
+// grafo.addEdge("G", "E", 4);
 
 function prim(grafo) {
 	let edges = new Array();
@@ -286,44 +292,29 @@ function prim(grafo) {
 	for (let v of grafo.vertices)
 		primGraph.addVertice(v);
 	for (let edge of edges)
-		primGraph.addEdge(edge.source, edge.target, edge.weight);		
-	
+		primGraph.addEdge(edge.source, edge.target, edge.weight);
+	alert(edges.map(e => e.weight).reduce((a,b) => a + b));
 	return primGraph;
 }
-
-let primGraph = prim(grafo);
 
 function kruskal(grafo) {
 	let edges = new Array();
 	let removedEdges = new Array();
-	for(let edges of grafo.list) {
-		for(let edge of edges) {
-			let alreadyIncluded = removedEdges.some(e => 
-				(e.source === edge.source && e.target === edge.target) ||
-				(e.source === edge.target && e.target === edge.source)
-			);
-			if(!alreadyIncluded)
-				removedEdges.push(edge);
-		}
-	}
-	let forest = grafo.vertices.map(v => [v]);	
+	for(let edges of grafo.list)
+		removedEdges = removedEdges.concat(edges);
+	
+	let forest = grafo.vertices.map(v => [v]);
 	removedEdges.sort((a, b) => b.weight - a.weight);
-	while(removedEdges.length) {
+	while(edges.length < grafo.vertices.length - 1) {
 		let minEdge = removedEdges.pop();
 		let source = grafo.getVertice(minEdge.source);
 		let target = grafo.getVertice(minEdge.target);
 		let sourceTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === source)).firstOrNull();
-		let targetTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === target)).firstOrNull();		
+		let targetTree = forest.map((t, i) => [i, t]).filter(tree => tree[1].some(v => v === target)).firstOrNull();
 		if(sourceTree[0] !== targetTree[0]) {
 			edges.push(minEdge);
-			let targetIndex = targetTree[1].indexOf(target);
-			if(targetTree[1].length > sourceTree[1]) {
-				let temp = sourceTree[0];
-				sourceTree[0] = targetTree[0];
-				targetTree[0] = temp;
-			}
-			forest[targetTree[0]].splice(targetIndex, 1);
-			forest[sourceTree[0]].push(target);
+			forest[sourceTree[0]] = forest[sourceTree[0]].concat(forest[targetTree[0]]);
+			forest.splice(targetTree[0], 1);
 		}
 	}
 	let kruskalGraph = new Grafo(false, true);
@@ -331,7 +322,7 @@ function kruskal(grafo) {
 		kruskalGraph.addVertice(vertice);
 	for(let edge of edges)
 		kruskalGraph.addEdge(edge.source, edge.target, edge.weight);
+
+	alert(edges.map(e => e.weight).reduce((a,b) => a + b));
 	return kruskalGraph;
 }
-
-let kruskalGraph = kruskal(grafo);

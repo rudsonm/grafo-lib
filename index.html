@@ -38,9 +38,10 @@
             </div>
         </div>
         <div style="display: inline-block">
-            <button onclick="prim(grafo)">Prim</button>
-            <button onclick="kruskal(grafo)">Kruskal</button>
+            <button onclick="prim(grafo).render()">Prim</button>
+            <button onclick="kruskal(grafo).render()">Kruskal</button>
             <button onclick="alert(grafo.planarity())">Planar</button>
+            <button onclick="grafo.render()">Renderizar</button>
         </div>
 
         <div id="graphDiv"></div>
