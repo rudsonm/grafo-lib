@@ -42,6 +42,7 @@
             <button onclick="kruskal(grafo).render()">Kruskal</button>
             <button onclick="alert(grafo.planarity())">Planar</button>
             <button onclick="grafo.render()">Renderizar</button>
+            <button onclick="let r = fordFukerson(grafo); r.grafo.render(); alert(r.solucao)">Ford-Fukerson</button>
         </div>
 
         <div id="graphDiv"></div>

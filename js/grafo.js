@@ -84,7 +84,19 @@ class Grafo {
 
 		this.hasTreeCicle = hasTreeCicle;
 		this.planarity = planarity;
+
+		this.clone = clone;
 	}
+}
+
+function clone() {
+	let other = new Grafo(this.directed, this.weight);
+	for(let vertice of this.vertices)
+		other.addVertice(vertice);
+	for(let arcs of this.list)
+		for(let arc of arcs)
+			other.addArc(arc.source, arc.target, arc.weight);
+	return other;
 }
 
 function addVertice(vertice) {
@@ -151,8 +163,8 @@ function addArc(source, target, weight = 1) {
 	if (typeof (target) === "string")
 		target = this.vertices.indexOf(target);
 	this.matrix[source][target] = weight;
-	let arc = new Arc(source, target, weight);
-	this.list[source].push(arc);
+	this.list[source].push(new Arc(source, target, weight));
+	this.vivaGraph.addLink(this.vertices[source], this.vertices[target]);
 }
 
 function removeEdge(source, target) {
@@ -190,7 +202,7 @@ function getNeighbors(source) {
 	return this.getNeighborsByIndex(index);
 }
 
-function getNeighborsByIndex(source) {
+function getNeighborsByIndex(source) {	
 	return this.list[source].map(s => this.getVertice(s.target));
 }
 
@@ -230,39 +242,25 @@ function planarity() {
 	return false;
 }
 
-var grafo = new Grafo(false, true);
+var grafo = new Grafo(true, true);
 
-grafo.addVertice("A");
-grafo.addVertice("B");
-grafo.addVertice("C");
-grafo.addVertice("D");
-grafo.addVertice("E");
 grafo.addVertice("F");
-// grafo.addVertice("G");
+grafo.addVertice("V1");
+grafo.addVertice("V2");
+grafo.addVertice("V3");
+grafo.addVertice("V4");
+grafo.addVertice("S");
 
-grafo.addEdge("A", "D");
-grafo.addEdge("A", "E");
-grafo.addEdge("A", "F");
-grafo.addEdge("B", "D");
-grafo.addEdge("B", "E");
-grafo.addEdge("B", "F");
-grafo.addEdge("C", "D");
-grafo.addEdge("C", "E");
-grafo.addEdge("C", "F");
-
-// grafo.addEdge("A", "B", 10);
-// grafo.addEdge("A", "C", 9);
-// grafo.addEdge("B", "C", 8);
-// grafo.addEdge("D", "E", 7);
-// grafo.addEdge("D", "F", 6);
-// grafo.addEdge("D", "A", 5);
-// grafo.addEdge("E", "B", 4);
-// grafo.addEdge("E", "A", 3);
-// grafo.addEdge("F", "B", 2);
-// grafo.addEdge("G", "A", 1);
-// grafo.addEdge("G", "B", 2);
-// grafo.addEdge("G", "D", 3);
-// grafo.addEdge("G", "E", 4);
+grafo.addArc("F", "V1", 16);
+grafo.addArc("F", "V2", 13);
+grafo.addArc("V1", "V2", 10);
+grafo.addArc("V1", "V3", 12);
+grafo.addArc("V2", "V1", 4);
+grafo.addArc("V2", "V4", 14);
+grafo.addArc("V3", "V2", 9);
+grafo.addArc("V3", "S", 20);
+grafo.addArc("V4", "V3", 7);
+grafo.addArc("V4", "S", 4);
 
 function prim(grafo) {
 	let edges = new Array();
@@ -325,4 +323,59 @@ function kruskal(grafo) {
 
 	alert(edges.map(e => e.weight).reduce((a,b) => a + b));
 	return kruskalGraph;
+}
+
+function DFS(grafo, incumbente, destino = null, pilha = [], visitados = []) {	
+	if(!visitados.some(v => v === incumbente)) {
+		pilha.push(incumbente);
+		visitados.push(incumbente);
+	}
+	if(destino && incumbente === destino)
+		return pilha;
+	let vizinhos = grafo.getNeighbors(incumbente).filter(n => !visitados.some(c => c === n));
+	let proximo = null;
+	if(vizinhos.length) {
+		proximo = vizinhos[0];
+	} else {
+		pilha.pop();
+		if(pilha.length)
+			proximo = pilha[pilha.length-1];
+		else
+			proximo = grafo.vertices.filter(v => !visitados.some(c => c === v)).firstOrNull();
+	}
+	if(proximo)
+		return DFS(grafo, proximo, destino, pilha, visitados)
+	else
+		return (destino) ? [] : pilha;
+}
+
+function fordFukerson(grafo) {
+	let aux = grafo.clone();
+	let solucao = 0;
+	let caminho = DFS(aux, "F", "S");
+	while(caminho.length) {
+		let menorArco = new Arc(0, 0, Infinity);
+		for(let i = 0; i < caminho.length - 1; i++) {
+			let arco = aux.getArc(caminho[i], caminho[i + 1]);
+			if(arco.weight < menorArco.weight)
+				menorArco = new Arc(arco.source, arco.target, arco.weight);
+		}
+		if(!menorArco.weight)
+			break;
+		solucao += menorArco.weight;
+		for(let i = 0; i < caminho.length - 1; i++) {
+			let forward = aux.getArc(caminho[i], caminho[i + 1]);
+			forward.weight -= menorArco.weight;
+			if(!forward.weight)
+				aux.removeArc(forward.source, forward.target);
+			let backward = aux.getArc(caminho[i + 1], caminho[i]);
+			if(backward)
+				backward.weight += menorArco.weight;
+			else
+				aux.addArc(caminho[i + 1], caminho[i], menorArco.weight);
+		}
+		alert(menorArco.weight + " -> " + JSON.stringify(caminho));
+		caminho = DFS(aux, "F", "S");
+	}
+	return {grafo: aux, solucao: solucao};
 }
